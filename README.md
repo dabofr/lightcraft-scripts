@@ -2,6 +2,9 @@
 
 Python scripts, with a small window to launch them, to tidy up a large [LightCraft](https://github.com/storytold/lightcraft) library on Windows: RAW + JPG pairs, sidecars, stacks, unnamed faces, keywords and place fields.
 
+![LightCraft scripts GUI](LC%20Scripts%20GUI.jpg)
+
+
 **Provided as is, without support.** They were written for one library and shared as a starting point: fork them, change them, keep what suits you. Tested with LightCraft 0.21.1 on Windows. A later version may change a command and break a script.
 
 ## What they do
@@ -22,9 +25,6 @@ Python scripts, with a small window to launch them, to tidy up a large [LightCra
 | `lc_gui.py` | The window: pick a script, folders and settings, then *Dry run* and *Apply*. |
 
 `lc_common.py` holds what they share.
-
-
-![LightCraft scripts GUI](LC%20Scripts%20GUI.jpg)
 
 
 ## Safety first
