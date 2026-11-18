@@ -11,7 +11,7 @@ Rules:
      pair is NOT touched; it is listed in mirror_conflicts.csv for you to decide.
 Ratings and flags are not concerned. Writes mirror_plan.csv (what will be done)."""
 from lc_common import (_, options, write_csv, relative, CONNECTED, APPLY, run, photos_by_folder,
-                       pairs, batches, dry_run_end)
+                       pairs, batches, dry_run_end, catalog_seq, save_plan, load_plan, forget_plan)
 
 # ---------------------------------------------------------------------------------- settings
 FOLDER = r"D:\Photos"     # folder to process, subfolders included
@@ -40,7 +40,39 @@ def target(ka, kb):
     return {k for k in union if k in common or not any(parent_of(k, o) for o in union)}, []
 
 
+def build_steps(actions):
+    """[(added, removed, ids)] -> photo.setMeta commands; small batches through the open app."""
+    steps = []
+    for add, rem, ids in actions:
+        for batch in batches(ids, 50 if CONNECTED else 500):
+            p = {"ids": batch}
+            if add:
+                p["addKeywords"] = list(add)
+            if rem:
+                p["removeKeywords"] = list(rem)
+            steps.append({"command": "photo.setMeta", "params": p})
+    return steps
+
+
+def apply(actions, photos):
+    steps = build_steps(actions)
+    failed, done = 0, 0
+    for batch in batches(steps, 50):
+        failed += sum(1 for x in run(batch) if not x.get("ok"))
+        done += len(batch)
+        print(_("  {done} / {total} commands", done=done, total=len(steps)))
+    print(_("Done: {photos} photos changed in {commands} commands, {failed} commands refused.",
+            photos=photos, commands=len(steps), failed=failed))
+    print(_("Run the script again as a dry run to check: it should announce 0 photos to change."))
+
+
 def main():
+    key = {"folder": FOLDER}
+    plan_saved = load_plan("lc_mirror", key)
+    if plan_saved:
+        apply(plan_saved["steps"], plan_saved["summary"]["photos"])
+        return forget_plan("lc_mirror", key)
+    seq = catalog_seq()
     pf = photos_by_folder(FOLDER)
     plan, conflicts, ok = [], [], 0
     actions = {}     # (added, removed) -> [ids]
@@ -76,26 +108,12 @@ def main():
               conflicts)
     print(_("{ok} pairs already matching, {photos} photos to change, {conflicts} pairs in contradiction "
             "(left untouched)", ok=ok, photos=len(plan), conflicts=len(conflicts)))
+    actions = [[list(add), list(rem), ids] for (add, rem), ids in actions.items()]
     if not APPLY:
+        save_plan("lc_mirror", key, seq, actions, {"photos": len(plan)})
         return dry_run_end()
-
-    steps = []
-    for (add, rem), ids in actions.items():
-        for batch in batches(ids, 50 if CONNECTED else 500):
-            p = {"ids": batch}
-            if add:
-                p["addKeywords"] = list(add)
-            if rem:
-                p["removeKeywords"] = list(rem)
-            steps.append({"command": "photo.setMeta", "params": p})
-    failed, done = 0, 0
-    for batch in batches(steps, 50):
-        failed += sum(1 for x in run(batch) if not x.get("ok"))
-        done += len(batch)
-        print(_("  {done} / {total} commands", done=done, total=len(steps)))
-    print(_("Done: {photos} photos changed in {commands} commands, {failed} commands refused.",
-            photos=len(plan), commands=len(steps), failed=failed))
-    print(_("Run the script again as a dry run to check: it should announce 0 photos to change."))
+    apply(actions, len(plan))
+    forget_plan("lc_mirror", key)
 
 
 if __name__ == "__main__":

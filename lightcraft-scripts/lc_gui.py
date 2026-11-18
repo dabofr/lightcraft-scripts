@@ -536,6 +536,9 @@ class App(tk.Tk):
             if signature not in self.dry_ok:
                 text += "\n⚠ " + _("No successful dry run with exactly these settings since this window "
                                    "was opened.") + "\n"
+            else:
+                text += "\n" + _("If the catalogue has not changed since the dry run, its plan is reused "
+                                  "without reading the photos again.") + "\n"
             text += "\n" + _("This time, the catalogue will be changed.")
             if not messagebox.askyesno(_("Confirm"), text, icon="warning", default="no"):
                 return
@@ -543,7 +546,8 @@ class App(tk.Tk):
         self.applying, self.signature, self.start = apply, signature, time.time()
         self.products.delete(0, "end")
         script = os.path.join(HERE, s["file"])
-        self.queue_runs = [(label, [PYTHON, "-u", script] + args + (["--apply"] if apply else []))
+        # --use-plan: the script reuses its dry run's plan if the catalogue has not changed since
+        self.queue_runs = [(label, [PYTHON, "-u", script] + args + (["--apply", "--use-plan"] if apply else []))
                            for label, args in runs]
         mode = _("APPLY") if apply else (_("READ") if s.get("read_only") else _("DRY RUN"))
         way = _("through the open LightCraft") if via_app else _("library opened directly")

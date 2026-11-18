@@ -66,6 +66,7 @@ OUTPUT_DIR = os.path.join(HERE, CONFIG.get("output_folder", "Output"))
 PAGE = 2000                                     # photos per listing request
 
 APPLY = "--apply" in sys.argv
+USE_PLAN = "--use-plan" in sys.argv   # with --apply: reuse the last dry run if the catalogue is unchanged
 
 
 # ------------------------------------------------------------------------------- translation
@@ -319,6 +320,77 @@ def write_csv(name, header, rows):
         w = csv.writer(f, delimiter=";")
         w.writerow(header)
         w.writerows(rows)
+
+
+# ------------------------------------------------------------------------- dry-run plans
+# A dry run saves the exact commands it would send, with the catalogue's change counter (seq of
+# library.info) read BEFORE reading the photos. An apply run with --use-plan reuses them only if
+# the counter has not moved since and the settings are the same: the catalogue is then exactly as
+# the dry run saw it. Otherwise it reads everything again, as without the option.
+PLANS_DIR = os.path.join(OUTPUT_DIR, ".plans")
+
+
+def catalog_seq():
+    """The catalogue's change counter, or None if this LightCraft does not give it."""
+    try:
+        x = run([{"command": "library.info", "params": {}}])[0]
+    except SystemExit:
+        return None
+    r = x.get("result") if x.get("ok") else None
+    return r.get("seq") if isinstance(r, dict) and isinstance(r.get("seq"), int) else None
+
+
+def _plan_path(script, settings):
+    import hashlib
+    key = json.dumps({"script": script, "library": os.path.normcase(os.path.normpath(LIBRARY or "")),
+                      "settings": settings}, sort_keys=True, ensure_ascii=False)
+    return os.path.join(PLANS_DIR, "%s-%s.json" % (script, hashlib.sha1(key.encode("utf-8")).hexdigest()[:16]))
+
+
+def save_plan(script, settings, seq, steps, summary):
+    """Keep the commands of a dry run for a later --apply --use-plan."""
+    if seq is None:
+        return
+    os.makedirs(PLANS_DIR, exist_ok=True)
+    with open(_plan_path(script, settings), "w", encoding="utf-8") as f:
+        json.dump({"seq": seq, "created": datetime.datetime.now().isoformat(timespec="minutes"),
+                   "summary": summary, "steps": steps}, f, ensure_ascii=False)
+
+
+def load_plan(script, settings):
+    """The saved plan if --use-plan was asked and the catalogue has not changed since, else None."""
+    if not (APPLY and USE_PLAN):
+        return None
+    path = _plan_path(script, settings)
+    try:
+        with open(path, encoding="utf-8") as f:
+            plan = json.load(f)
+    except (OSError, ValueError):
+        print(_("No dry-run plan for these settings: full check."))
+        return None
+    seq = catalog_seq()
+    if seq is None or seq != plan.get("seq"):
+        print(_("The catalogue changed since the dry run of {time}: full check.", time=plan.get("created")))
+        return None
+    print(_("Catalogue unchanged since the dry run of {time}: its plan is used, without reading the "
+            "photos again.", time=plan.get("created")))
+    return plan
+
+
+def forget_plan(script, settings):
+    try:
+        os.unlink(_plan_path(script, settings))
+    except OSError:
+        pass
+
+
+def file_hash(path):
+    import hashlib
+    try:
+        with open(path, "rb") as f:
+            return hashlib.sha1(f.read()).hexdigest()
+    except OSError:
+        return None
 
 
 def dry_run_end():

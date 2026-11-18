@@ -3,7 +3,8 @@
 left as they are.   uv run lc_stacks.py   then   uv run lc_stacks.py --apply
 A test pair is stacked and checked first; if the result is not as expected, the script stops."""
 import sys
-from lc_common import _, options, APPLY, run, photos_by_folder, pairs, batches, command_doc, dry_run_end
+from lc_common import (_, options, APPLY, run, photos_by_folder, pairs, batches, command_doc, dry_run_end,
+                       catalog_seq, save_plan, load_plan, forget_plan)
 
 # ---------------------------------------------------------------------------------- settings
 FOLDER = r"D:\Photos"     # folder to process, subfolders included
@@ -23,6 +24,12 @@ def group(ids):
 
 
 def main():
+    key = {"folder": FOLDER}
+    plan = load_plan("lc_stacks", key)
+    if plan:
+        stack(plan["steps"])
+        return forget_plan("lc_stacks", key)
+    seq = catalog_seq()
     pf = photos_by_folder(FOLDER)
     every = [[r["id"]] + [t["id"] for t in ts] for photos in pf.values() for r, ts in pairs(photos)]
     print(_("{count} pairs found; reading their state...", count=len(every)))
@@ -33,10 +40,16 @@ def main():
                 todo.append(ids)
     print(_("{todo} pairs to stack, {done} already stacked", todo=len(todo), done=len(every) - len(todo)))
     if not APPLY:
+        save_plan("lc_stacks", key, seq, todo, {"pairs": len(todo)})
         return dry_run_end()
+    stack(todo)
+    forget_plan("lc_stacks", key)
+
+
+def stack(todo):
+    """Stacks the given groups of ids (raw first), a test pair first."""
     if not todo:
         return print(_("Nothing to do."))
-
     test = todo[0]
     run([group(test)])
     s = stacks_of([test])[0]

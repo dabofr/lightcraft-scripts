@@ -16,7 +16,8 @@ Writes places_plan.csv (final value of the four fields and the fields that chang
 import csv
 import sys
 from lc_common import (_, options, write_csv, relative, CONNECTED, APPLY, run, photos_by_folder,
-                       batches, dry_run_end, PLACES_BRANCH, MUSEUMS_BRANCH, PLACES_TABLE)
+                       batches, dry_run_end, PLACES_BRANCH, MUSEUMS_BRANCH, PLACES_TABLE,
+                       catalog_seq, save_plan, load_plan, forget_plan, file_hash)
 
 # ---------------------------------------------------------------------------------- settings
 FOLDER = r"D:\Photos"     # folder to process, subfolders included
@@ -51,7 +52,36 @@ def finest(keywords):
     return [k for k in keywords if not any(a.startswith(k + "|") for a in keywords)]
 
 
+def build_steps(actions):
+    """[(changes, ids)] -> photo.setMeta commands; small batches through the open app (60 s limit)."""
+    steps = []
+    for change, ids in actions:
+        for batch in batches(ids, 50 if CONNECTED else 500):
+            p = {"ids": batch}
+            p.update(dict(change))
+            steps.append({"command": "photo.setMeta", "params": p})
+    return steps
+
+
+def apply(actions, photos):
+    steps = build_steps(actions)
+    failed, done = 0, 0
+    for batch in batches(steps, 20):
+        failed += sum(1 for x in run(batch) if not x.get("ok"))
+        done += len(batch)
+        print(_("  {done} / {total} commands", done=done, total=len(steps)))
+    print(_("Done: {photos} photos completed in {commands} commands, {failed} commands refused.",
+            photos=photos, commands=len(steps), failed=failed))
+
+
 def main():
+    key = {"folder": FOLDER, "places": PLACES_BRANCH, "museums": MUSEUMS_BRANCH,
+           "table": file_hash(PLACES_TABLE)}
+    plan = load_plan("lc_places", key)
+    if plan:
+        apply(plan["steps"], plan["summary"]["photos"])
+        return forget_plan("lc_places", key)
+    seq = catalog_seq()
     table = read_table()
     print(_("{count} lines in the table", count=len(table)))
     pf = photos_by_folder(FOLDER)
@@ -120,22 +150,12 @@ def main():
     write_csv("places_to_check.csv", [_("folder"), _("file"), _("reason"), _("detail")], to_check)
     print(_("{photos} photos to complete, {lines} lines to check (of which {kept} typed values kept)",
             photos=len(plan), lines=len(to_check), kept=kept))
+    actions = [[list(map(list, change)), ids] for change, ids in actions.items()]
     if not APPLY:
+        save_plan("lc_places", key, seq, actions, {"photos": len(plan)})
         return dry_run_end()
-
-    steps = []
-    for change, ids in actions.items():
-        for batch in batches(ids, 50 if CONNECTED else 500):
-            p = {"ids": batch}
-            p.update(dict(change))
-            steps.append({"command": "photo.setMeta", "params": p})
-    failed, done = 0, 0
-    for batch in batches(steps, 20):
-        failed += sum(1 for x in run(batch) if not x.get("ok"))
-        done += len(batch)
-        print(_("  {done} / {total} commands", done=done, total=len(steps)))
-    print(_("Done: {photos} photos completed in {commands} commands, {failed} commands refused.",
-            photos=len(plan), commands=len(steps), failed=failed))
+    apply(actions, len(plan))
+    forget_plan("lc_places", key)
 
 
 if __name__ == "__main__":
