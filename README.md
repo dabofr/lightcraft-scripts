@@ -23,6 +23,10 @@ Python scripts, with a small window to launch them, to tidy up a large [LightCra
 
 `lc_common.py` holds what they share.
 
+
+![LightCraft scripts GUI](LC%20Scripts%20GUI.jpg)
+
+
 ## Safety first
 
 - **Every script is a dry run by default.** It counts, lists and writes its CSV files, and changes nothing. Changes only happen with `--apply` (or the *Apply* button, which asks for confirmation).
