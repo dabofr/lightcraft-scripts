@@ -2,6 +2,8 @@
 
 Des scripts Python, avec une petite fenêtre pour les lancer, pour mettre de l'ordre dans une grosse bibliothèque [LightCraft](https://github.com/storytold/lightcraft) sous Windows : paires RAW + JPG, sidecars, piles, visages sans nom, mots-clés et champs de lieu.
 
+![LightCraft scripts GUI](LC%20Scripts%20GUI.jpg)
+
 **Fournis tels quels, sans support.** Ils ont été écrits pour une bibliothèque et sont partagés comme point de départ : copiez-les, modifiez-les, gardez ce qui vous sert. Testés avec LightCraft 0.21.1 sous Windows. Une version ultérieure pourra changer une commande et casser un script.
 
 ## Ce qu'ils font
