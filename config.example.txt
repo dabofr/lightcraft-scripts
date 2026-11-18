@@ -1,0 +1,35 @@
+# Settings for the LightCraft scripts. Copy this file as config.txt (the scripts do it for you
+# on first run) and fill it in. Write Windows paths between single quotes: 'D:\Photos'.
+
+# Language of the scripts and of the window: "auto" (Windows language), "en", "fr"...
+# A language needs a file in the lang folder (lang/fr.json); missing texts stay in English.
+language = "auto"
+
+# lightcraft-cli.exe, installed next to LightCraft
+cli = 'C:\Program Files\ArtCraft\LightCraft\lightcraft-cli.exe'
+
+# Default LightCraft library folder (the one holding catalog.snap); the window can choose others
+library = 'C:\Users\YourName\Pictures\LightCraft Library\Main'
+
+# Default folder that holds all your photos (the scripts only work below it); the window
+# remembers one per library
+photos_root = 'D:\Photos'
+
+# How the scripts reach LightCraft:
+#   "auto"    = through the running app if it listens on its control port, else open the library
+#   "app"     = always through the running app
+#   "library" = always open the library directly (LightCraft must be closed)
+# The app listens when the environment variable LIGHTCRAFT_CONTROL_PORT is set (e.g. 7980)
+# or when started with:  lightcraft --control 7980
+connection = "auto"
+control_port = 7980
+
+# Keyword branches used by lc_places.py and lc_audit.py (with the trailing |)
+places_branch = "Places|"
+museums_branch = "Type|Museums|"
+
+# Table that turns place and museum keywords into location / city / state / country
+places_table = "places_table.csv"
+
+# Subfolder (next to the scripts) where CSV files and logs are written
+output_folder = "Output"
