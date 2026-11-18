@@ -49,6 +49,10 @@ Only one program at a time can open a library.
 
 The choice is automatic; the first line printed says which way is used (`connection` in `config.txt` can force it).
 
+## Applying after a dry run
+
+A dry run of the mirror, places, stacks or unnamed faces scripts keeps the exact list of changes it found, together with the catalogue's change counter. When you then click *Apply* (or run with `--apply --use-plan`), the script reuses that list **only if the catalogue has not changed at all since** and the settings are the same; it then skips reading every photo again, which saves minutes on a large library. If anything changed in between (an edit in LightCraft, another script), it says so and checks everything again, as before.
+
 ## Output files
 
 CSV files and logs go to the `Output` folder, never overwriting one another: `places_plan 2026-11-18 1.csv`, then `… 2.csv`. They are UTF-8 with `;` separators and open in Excel.

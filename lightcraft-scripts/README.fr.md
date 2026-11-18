@@ -49,6 +49,10 @@ Un seul programme à la fois peut ouvrir une bibliothèque.
 
 Le choix est automatique ; la première ligne affichée indique la voie prise (`connection` dans `config.txt` permet de la forcer).
 
+## Appliquer après un essai à blanc
+
+L'essai à blanc du miroir, des lieux, des piles ou des visages sans nom garde la liste exacte des modifications trouvées, avec le compteur de modifications du catalogue. Quand on clique ensuite sur *Appliquer* (ou qu'on lance avec `--apply --use-plan`), le script réutilise cette liste **seulement si le catalogue n'a pas changé du tout depuis** et que les réglages sont les mêmes ; il évite alors de relire chaque photo, ce qui fait gagner des minutes sur une grosse bibliothèque. Si quelque chose a changé entre-temps (une retouche dans LightCraft, un autre script), il le signale et revérifie tout, comme avant.
+
 ## Fichiers produits
 
 Les CSV et journaux vont dans le dossier `Output` (réglable), sans jamais s'écraser : `places_plan 2026-11-18 1.csv`, puis `… 2.csv`. Ils sont en UTF-8 avec séparateur `;` et s'ouvrent dans Excel.
