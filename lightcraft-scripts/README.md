@@ -20,6 +20,7 @@ Python scripts, with a small window to launch them, to tidy up a large [LightCra
 | `lc_unnamed_faces.py` | Removes unnamed faces found by automatic detection. Named faces are never touched. |
 | `lc_mirror.py` | Gives a raw and its JPG the same keywords; the more precise keyword wins; contradictions are listed, not touched. |
 | `lc_places.py` | Fills location / city / state / country from keywords, through a table (`places_table.csv`). |
+| `lc_harmonize.py` | Mirror, then places, with a single sidecar write at the end (faster than both separately). |
 | `lc_after_import.py` | Relink, reload, unnamed faces, stacks and sidecars in one go, on one or several folders. |
 | `lc_gui.py` | The window: pick a script, folders and settings, then *Dry run* and *Apply*. |
 
@@ -52,6 +53,12 @@ The choice is automatic; the first line printed says which way is used (`connect
 ## Applying after a dry run
 
 A dry run of the mirror, places, stacks or unnamed faces scripts keeps the exact list of changes it found, together with the catalogue's change counter. When you then click *Apply* (or run with `--apply --use-plan`), the script reuses that list **only if the catalogue has not changed at all since** and the settings are the same; it then skips reading every photo again, which saves minutes on a large library. If anything changed in between (an edit in LightCraft, another script), it says so and checks everything again, as before.
+
+## Sidecar writing in big jobs
+
+With automatic sidecar writing on, writing the `.xmp` file takes most of the time of a metadata change (about 80 % in a measurement on a real library), and one grouped write at the end costs about half as much per photo. So the mirror, places and harmonize scripts **pause automatic writing, remember every photo they change, write their sidecars in one go at the end, and switch automatic writing back on whatever happens**.
+
+LightCraft does not catch up by itself when automatic writing is switched back on, so the list of changed photos is kept in a small file (`.state` folder) while a job runs. If a job is killed, the next script you run finishes writing those sidecars and switches automatic writing back on before doing anything else; the window warns you at start-up. If automatic writing was already off in LightCraft, the scripts leave it off and write no sidecar.
 
 ## Output files
 

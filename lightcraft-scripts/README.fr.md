@@ -20,6 +20,7 @@ Des scripts Python, avec une petite fenêtre pour les lancer, pour mettre de l'o
 | `lc_unnamed_faces.py` | Supprime les visages sans nom détectés automatiquement. Les visages nommés ne sont jamais touchés. |
 | `lc_mirror.py` | Donne les mêmes mots-clés au RAW et à son JPG ; le plus précis l'emporte ; les contradictions sont listées, pas touchées. |
 | `lc_places.py` | Remplit lieu, ville, province et pays depuis les mots-clés, grâce à une table (`places_table.csv`). |
+| `lc_harmonize.py` | Miroir puis lieux, avec une seule écriture des sidecars à la fin (plus rapide que les deux séparément). |
 | `lc_after_import.py` | Relink, rechargement, visages sans nom, piles et sidecars d'un coup, sur un ou plusieurs dossiers. |
 | `lc_gui.py` | La fenêtre : choisir un script, des dossiers et des réglages, puis *Essai à blanc* et *Appliquer*. |
 
@@ -52,6 +53,12 @@ Le choix est automatique ; la première ligne affichée indique la voie prise (`
 ## Appliquer après un essai à blanc
 
 L'essai à blanc du miroir, des lieux, des piles ou des visages sans nom garde la liste exacte des modifications trouvées, avec le compteur de modifications du catalogue. Quand on clique ensuite sur *Appliquer* (ou qu'on lance avec `--apply --use-plan`), le script réutilise cette liste **seulement si le catalogue n'a pas changé du tout depuis** et que les réglages sont les mêmes ; il évite alors de relire chaque photo, ce qui fait gagner des minutes sur une grosse bibliothèque. Si quelque chose a changé entre-temps (une retouche dans LightCraft, un autre script), il le signale et revérifie tout, comme avant.
+
+## Écriture des sidecars dans les gros traitements
+
+Avec l'écriture automatique active, écrire le fichier `.xmp` prend l'essentiel du temps d'une modification (environ 80 % dans une mesure sur une vraie bibliothèque), et une écriture groupée à la fin coûte environ deux fois moins par photo. Le miroir, les lieux et l'enchaînement « Harmoniser » **suspendent donc l'écriture automatique, retiennent chaque photo modifiée, écrivent leurs sidecars en une fois à la fin, et réactivent l'écriture automatique quoi qu'il arrive**.
+
+LightCraft ne rattrape rien de lui-même quand on réactive l'écriture automatique : la liste des photos modifiées est donc gardée dans un petit fichier (dossier `.state`) pendant le traitement. Si un traitement est interrompu, le prochain script lancé termine l'écriture de ces sidecars et réactive l'écriture automatique avant toute chose ; la fenêtre le signale à son ouverture. Si l'écriture automatique était déjà coupée dans LightCraft, les scripts la laissent coupée et n'écrivent aucun sidecar.
 
 ## Fichiers produits
 

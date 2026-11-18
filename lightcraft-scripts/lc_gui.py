@@ -85,6 +85,11 @@ SCRIPTS = [
                        "Contradictions are left untouched.\nDry run: read mirror_plan.csv and "
                        "mirror_conflicts.csv before applying."),
              settings=[]),
+        dict(file="lc_harmonize.py", title=_("Mirror, then places (one write)"), folder="one",
+             summary=_("Runs the mirror, then the place fields, and writes the sidecars of all changed "
+                       "photos once at the end: faster than running both separately.\nDry run: read the "
+                       "CSV files of both."),
+             settings=[]),
         dict(file="lc_places.py", title=_("Place fields"), folder="one",
              summary=_("Fills location, city, state and country from the keywords and the places table. "
                        "Never replaces a value typed by hand, never empties a field.\nRun after the "
@@ -392,8 +397,17 @@ class App(tk.Tk):
         if first:
             self.tree.selection_set(first)
         self.after(100, self.poll)
+        self.after(500, self.interrupted_run)
         if C.CONFIG_CREATED or not os.path.isfile(C.CLI):
             self.after(300, self.first_run)
+
+    def interrupted_run(self):
+        if os.path.isdir(C.STATE_DIR) and any(n.startswith("sidecars-") for n in os.listdir(C.STATE_DIR)):
+            messagebox.showwarning(
+                _("Sidecars to finish"),
+                _("A previous run was interrupted while sidecar writing was paused: some sidecars are "
+                  "not written yet, and automatic writing may still be off in LightCraft.\n\nRun any "
+                  "script (the Inventory, for instance): it finishes the job before anything else."))
 
     def first_run(self):
         messagebox.showinfo(_("Settings needed"),

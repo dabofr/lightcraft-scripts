@@ -230,5 +230,17 @@
   "No dry-run plan for these settings: full check.": "Pas de plan d'essai à blanc pour ces réglages : vérification complète.",
   "The catalogue changed since the dry run of {time}: full check.": "Le catalogue a changé depuis l'essai à blanc de {time} : vérification complète.",
   "Catalogue unchanged since the dry run of {time}: its plan is used, without reading the photos again.": "Catalogue inchangé depuis l'essai à blanc de {time} : son plan est utilisé, sans relire les photos.",
-  "If the catalogue has not changed since the dry run, its plan is reused without reading the photos again.": "Si le catalogue n'a pas changé depuis l'essai à blanc, son plan sera réutilisé, sans relire les photos."
+  "If the catalogue has not changed since the dry run, its plan is reused without reading the photos again.": "Si le catalogue n'a pas changé depuis l'essai à blanc, son plan sera réutilisé, sans relire les photos.",
+  "Writing the sidecars of {count} changed photos...": "Écriture des sidecars des {count} photos modifiées...",
+  "Sidecars: {written} written, {failed} failures.": "Sidecars : {written} écrits, {failed} échecs.",
+  "A previous run was interrupted while sidecar writing was deferred: finishing it first.": "Un traitement précédent a été interrompu pendant que l'écriture des sidecars était différée : on le termine d'abord.",
+  "Automatic sidecar writing is on again.": "L'écriture automatique des sidecars est réactivée.",
+  "Automatic sidecar writing paused; the sidecars will be written once at the end.": "Écriture automatique des sidecars suspendue ; les sidecars seront écrits en une fois à la fin.",
+  "1. Mirror keywords RAW <-> JPG": "1. Miroir des mots-clés RAW <-> JPG",
+  "2. Place fields": "2. Champs de lieu",
+  "3. Sidecars": "3. Sidecars",
+  "Mirror, then places (one write)": "Miroir puis lieux (une seule écriture)",
+  "Runs the mirror, then the place fields, and writes the sidecars of all changed photos once at the end: faster than running both separately.\nDry run: read the CSV files of both.": "Enchaîne le miroir puis les champs de lieu, et écrit les sidecars de toutes les photos modifiées en une fois à la fin : plus rapide que les deux séparément.\nÀ blanc : relire les CSV des deux.",
+  "Sidecars to finish": "Sidecars à terminer",
+  "A previous run was interrupted while sidecar writing was paused: some sidecars are not written yet, and automatic writing may still be off in LightCraft.\n\nRun any script (the Inventory, for instance): it finishes the job before anything else.": "Un traitement précédent a été interrompu pendant que l'écriture des sidecars était suspendue : des sidecars ne sont pas encore écrits, et l'écriture automatique est peut-être encore coupée dans LightCraft.\n\nLance n'importe quel script (l'Inventaire par exemple) : il termine le travail avant toute chose."
 }

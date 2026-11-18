@@ -17,7 +17,7 @@ import csv
 import sys
 from lc_common import (_, options, write_csv, relative, CONNECTED, APPLY, run, photos_by_folder,
                        batches, dry_run_end, PLACES_BRANCH, MUSEUMS_BRANCH, PLACES_TABLE,
-                       catalog_seq, save_plan, load_plan, forget_plan, file_hash)
+                       catalog_seq, save_plan, load_plan, forget_plan, DeferredSidecars, file_hash)
 
 # ---------------------------------------------------------------------------------- settings
 FOLDER = r"D:\Photos"     # folder to process, subfolders included
@@ -63,10 +63,15 @@ def build_steps(actions):
     return steps
 
 
-def apply(actions, photos):
+def apply(actions, photos, deferred=None):
+    """Applies the changes; sidecars written once at the end (or by the caller's `deferred`)."""
+    if deferred is None:
+        with DeferredSidecars() as d:
+            return apply(actions, photos, d)
     steps = build_steps(actions)
     failed, done = 0, 0
     for batch in batches(steps, 20):
+        deferred.add(i for s in batch for i in s["params"]["ids"])
         failed += sum(1 for x in run(batch) if not x.get("ok"))
         done += len(batch)
         print(_("  {done} / {total} commands", done=done, total=len(steps)))
@@ -74,12 +79,12 @@ def apply(actions, photos):
             photos=photos, commands=len(steps), failed=failed))
 
 
-def main():
+def main(deferred=None):
     key = {"folder": FOLDER, "places": PLACES_BRANCH, "museums": MUSEUMS_BRANCH,
            "table": file_hash(PLACES_TABLE)}
     plan = load_plan("lc_places", key)
     if plan:
-        apply(plan["steps"], plan["summary"]["photos"])
+        apply(plan["steps"], plan["summary"]["photos"], deferred)
         return forget_plan("lc_places", key)
     seq = catalog_seq()
     table = read_table()
@@ -154,7 +159,7 @@ def main():
     if not APPLY:
         save_plan("lc_places", key, seq, actions, {"photos": len(plan)})
         return dry_run_end()
-    apply(actions, len(plan))
+    apply(actions, len(plan), deferred)
     forget_plan("lc_places", key)
 
 

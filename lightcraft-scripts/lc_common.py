@@ -141,6 +141,7 @@ def check_setup():
                        "({chosen}). Open the right one, or close LightCraft.", opened=opened, chosen=LIBRARY))
     elif not os.path.isdir(LIBRARY):
         sys.exit(_("STOP: library not found at {path}.", path=LIBRARY))
+    recover_sidecars()
 
 
 def options(g):
@@ -150,9 +151,9 @@ def options(g):
     called by another one ignores options that are not its own)."""
     main = g.get("__name__") == "__main__"
     if main:
-        check_setup()
         print(_("Link: LightCraft is open (port {port}) - keep its window visible", port=PORT[1])
               if CONNECTED else _("Link: library opened directly (LightCraft must be closed)"))
+        check_setup()
     lists, seen = {}, []
     for arg in sys.argv[1:]:
         if not arg.startswith("--") or "=" not in arg:
@@ -391,6 +392,99 @@ def file_hash(path):
             return hashlib.sha1(f.read()).hexdigest()
     except OSError:
         return None
+
+
+# ------------------------------------------------------------------- deferred sidecar writes
+# Measured on a real library: with automatic writing on, writing the sidecar takes about 80 % of
+# the time of a metadata change, and one grouped explicit write costs about half as much per photo.
+# So the big scripts switch automatic writing off, remember the photos they change, write their
+# sidecars in one go at the end, and switch it back on WHATEVER HAPPENS. LightCraft does NOT catch
+# up on its own when automatic writing is switched back on (tested), hence the list of photos and a
+# marker file: if a script is killed meanwhile, the next script to run finishes the job first.
+STATE_DIR = os.path.join(HERE, ".state")
+
+
+def _marker():
+    import hashlib
+    lib = os.path.normcase(os.path.normpath(LIBRARY or ""))
+    return os.path.join(STATE_DIR, "sidecars-%s.json" % hashlib.sha1(lib.encode("utf-8")).hexdigest()[:12])
+
+
+def _write_sidecars(ids):
+    ids = sorted(set(ids))
+    if not ids:
+        return
+    print(_("Writing the sidecars of {count} changed photos...", count=len(ids)))
+    total = {"written": 0, "failed": 0}
+    for batch in batches(ids, 50 if CONNECTED else 500):
+        x = run([{"command": "photo.saveMetadataToFile", "params": {"ids": batch}}])[0]
+        r = x.get("result") or {}
+        total["written"] += size(r.get("written", 0))
+        total["failed"] += size(r.get("failed", 0)) if x.get("ok") else len(batch)
+    print(_("Sidecars: {written} written, {failed} failures.", **total))
+
+
+def _set_auto_write(on):
+    one("library.xmpPreferences", {"autoWrite": bool(on)})
+
+
+def recover_sidecars():
+    """If a previous run was interrupted with automatic writing off, finish its work now."""
+    path = _marker()
+    if not os.path.exists(path):
+        return
+    try:
+        with open(path, encoding="utf-8") as f:
+            state = json.load(f)
+    except (OSError, ValueError):
+        state = {}
+    print(_("A previous run was interrupted while sidecar writing was deferred: finishing it first."))
+    _write_sidecars(state.get("ids") or [])
+    _set_auto_write(True)
+    os.unlink(path)
+    print(_("Automatic sidecar writing is on again."))
+
+
+class DeferredSidecars:
+    """with DeferredSidecars() as d: ... d.add(ids) before changing photos ...
+    Does nothing if automatic writing was already off (the user's choice is kept)."""
+
+    def __init__(self):
+        self.ids, self.active = set(), False
+
+    def __enter__(self):
+        prefs = one("library.xmpPreferences") or {}
+        if APPLY and prefs.get("autoWrite"):
+            os.makedirs(STATE_DIR, exist_ok=True)
+            self.active = True
+            self._save()
+            _set_auto_write(False)
+            print(_("Automatic sidecar writing paused; the sidecars will be written once at the end."))
+        return self
+
+    def add(self, ids):
+        if self.active:
+            self.ids.update(ids)
+            self._save()               # saved BEFORE the change, so nothing is lost on a crash
+
+    def _save(self):
+        with open(_marker(), "w", encoding="utf-8") as f:
+            json.dump({"library": LIBRARY, "ids": sorted(self.ids),
+                       "since": datetime.datetime.now().isoformat(timespec="seconds")}, f)
+
+    def __exit__(self, *exc):
+        if not self.active:
+            return False
+        try:
+            _write_sidecars(self.ids)
+        finally:
+            _set_auto_write(True)
+            try:
+                os.unlink(_marker())
+            except OSError:
+                pass
+            print(_("Automatic sidecar writing is on again."))
+        return False
 
 
 def dry_run_end():

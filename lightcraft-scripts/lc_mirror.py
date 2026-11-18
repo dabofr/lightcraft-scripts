@@ -11,7 +11,7 @@ Rules:
      pair is NOT touched; it is listed in mirror_conflicts.csv for you to decide.
 Ratings and flags are not concerned. Writes mirror_plan.csv (what will be done)."""
 from lc_common import (_, options, write_csv, relative, CONNECTED, APPLY, run, photos_by_folder,
-                       pairs, batches, dry_run_end, catalog_seq, save_plan, load_plan, forget_plan)
+                       pairs, batches, dry_run_end, catalog_seq, save_plan, load_plan, forget_plan, DeferredSidecars)
 
 # ---------------------------------------------------------------------------------- settings
 FOLDER = r"D:\Photos"     # folder to process, subfolders included
@@ -54,10 +54,15 @@ def build_steps(actions):
     return steps
 
 
-def apply(actions, photos):
+def apply(actions, photos, deferred=None):
+    """Applies the changes; sidecars written once at the end (or by the caller's `deferred`)."""
+    if deferred is None:
+        with DeferredSidecars() as d:
+            return apply(actions, photos, d)
     steps = build_steps(actions)
     failed, done = 0, 0
     for batch in batches(steps, 50):
+        deferred.add(i for s in batch for i in s["params"]["ids"])
         failed += sum(1 for x in run(batch) if not x.get("ok"))
         done += len(batch)
         print(_("  {done} / {total} commands", done=done, total=len(steps)))
@@ -66,11 +71,11 @@ def apply(actions, photos):
     print(_("Run the script again as a dry run to check: it should announce 0 photos to change."))
 
 
-def main():
+def main(deferred=None):
     key = {"folder": FOLDER}
     plan_saved = load_plan("lc_mirror", key)
     if plan_saved:
-        apply(plan_saved["steps"], plan_saved["summary"]["photos"])
+        apply(plan_saved["steps"], plan_saved["summary"]["photos"], deferred)
         return forget_plan("lc_mirror", key)
     seq = catalog_seq()
     pf = photos_by_folder(FOLDER)
@@ -112,7 +117,7 @@ def main():
     if not APPLY:
         save_plan("lc_mirror", key, seq, actions, {"photos": len(plan)})
         return dry_run_end()
-    apply(actions, len(plan))
+    apply(actions, len(plan), deferred)
     forget_plan("lc_mirror", key)
 
 
