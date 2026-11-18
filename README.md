@@ -4,7 +4,6 @@ Python scripts, with a small window to launch them, to tidy up a large [LightCra
 
 ![LightCraft scripts GUI](LC%20Scripts%20GUI.jpg)
 
-
 **Provided as is, without support.** They were written for one library and shared as a starting point: fork them, change them, keep what suits you. Tested with LightCraft 0.21.1 on Windows. A later version may change a command and break a script.
 
 ## What they do
@@ -25,7 +24,6 @@ Python scripts, with a small window to launch them, to tidy up a large [LightCra
 | `lc_gui.py` | The window: pick a script, folders and settings, then *Dry run* and *Apply*. |
 
 `lc_common.py` holds what they share.
-
 
 ## Safety first
 
@@ -50,6 +48,10 @@ Only one program at a time can open a library.
 - **LightCraft closed**: the scripts open the library themselves. Faster for big jobs on a whole library.
 
 The choice is automatic; the first line printed says which way is used (`connection` in `config.txt` can force it).
+
+## Applying after a dry run
+
+A dry run of the mirror, places, stacks or unnamed faces scripts keeps the exact list of changes it found, together with the catalogue's change counter. When you then click *Apply* (or run with `--apply --use-plan`), the script reuses that list **only if the catalogue has not changed at all since** and the settings are the same; it then skips reading every photo again, which saves minutes on a large library. If anything changed in between (an edit in LightCraft, another script), it says so and checks everything again, as before.
 
 ## Output files
 
