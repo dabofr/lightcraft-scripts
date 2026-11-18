@@ -226,5 +226,9 @@
   "This folder does not look like a LightCraft library (no catalog.snap):\n{path}\n\nUse it anyway?": "Ce dossier ne ressemble pas à une bibliothèque LightCraft (pas de catalog.snap) :\n{path}\n\nL'utiliser quand même ?",
   "Photos root": "Racine des photos",
   "Photos root not found:\n{path}": "Racine des photos introuvable :\n{path}",
-  "Library: {path}": "Bibliothèque : {path}"
+  "Library: {path}": "Bibliothèque : {path}",
+  "No dry-run plan for these settings: full check.": "Pas de plan d'essai à blanc pour ces réglages : vérification complète.",
+  "The catalogue changed since the dry run of {time}: full check.": "Le catalogue a changé depuis l'essai à blanc de {time} : vérification complète.",
+  "Catalogue unchanged since the dry run of {time}: its plan is used, without reading the photos again.": "Catalogue inchangé depuis l'essai à blanc de {time} : son plan est utilisé, sans relire les photos.",
+  "If the catalogue has not changed since the dry run, its plan is reused without reading the photos again.": "Si le catalogue n'a pas changé depuis l'essai à blanc, son plan sera réutilisé, sans relire les photos."
 }
