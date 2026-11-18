@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Mirror keywords RAW <-> JPG, then fill the place fields, with ONE sidecar write at the end.
+"""Mirror RAW <-> JPG metadata, then fill the place fields, with ONE sidecar write at the end.
    uv run lc_harmonize.py   then   uv run lc_harmonize.py --apply
 
 Same as running lc_mirror.py then lc_places.py, but the sidecars of every photo changed by either
@@ -26,7 +26,7 @@ def main():
     lc_mirror.FOLDER = FOLDER
     lc_places.FOLDER = FOLDER
     with DeferredSidecars() as d:
-        title(_("1. Mirror keywords RAW <-> JPG"))
+        title(_("1. Mirror RAW <-> JPG"))
         lc_mirror.main(d)
         title(_("2. Place fields"))
         lc_places.main(d)

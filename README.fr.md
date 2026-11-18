@@ -18,7 +18,7 @@ Des scripts Python, avec une petite fenêtre pour les lancer, pour mettre de l'o
 | `lc_stacks.py` | Empile chaque paire RAW + JPG, RAW en tête, pile repliée. |
 | `lc_collapse_stacks.py` | Replie toutes les piles ouvertes. |
 | `lc_unnamed_faces.py` | Supprime les visages sans nom détectés automatiquement. Les visages nommés ne sont jamais touchés. |
-| `lc_mirror.py` | Donne les mêmes mots-clés au RAW et à son JPG ; le plus précis l'emporte ; les contradictions sont listées, pas touchées. |
+| `lc_mirror.py` | Donne au RAW et à son JPG les mêmes mots-clés (le plus précis l'emporte), champs texte, lieu et GPS, note, drapeau et libellé de couleur : une valeur remplie d'un seul côté est recopiée de l'autre ; les contradictions sont listées, pas touchées. |
 | `lc_places.py` | Remplit lieu, ville, province et pays depuis les mots-clés, grâce à une table (`places_table.csv`). |
 | `lc_harmonize.py` | Miroir puis lieux, avec une seule écriture des sidecars à la fin (plus rapide que les deux séparément). |
 | `lc_after_import.py` | Relink, rechargement, visages sans nom, piles et sidecars d'un coup, sur un ou plusieurs dossiers. |

@@ -80,11 +80,14 @@ SCRIPTS = [
              settings=[("ONLY_DETECTED", "bool", _("Only « Detected by » regions (keep checked)"))]),
     ]),
     (_("Metadata"), [
-        dict(file="lc_mirror.py", title=_("Mirror keywords RAW ↔ JPG"), folder="one",
-             summary=_("Gives a raw and its JPG the same keywords; the more precise one wins. "
-                       "Contradictions are left untouched.\nDry run: read mirror_plan.csv and "
-                       "mirror_conflicts.csv before applying."),
-             settings=[]),
+        dict(file="lc_mirror.py", title=_("Mirror RAW ↔ JPG"), folder="one",
+             summary=_("Gives a raw and its JPG the same keywords (the more precise one wins), text, "
+                       "place and GPS fields, rating, flag and colour label: a value filled on one side "
+                       "only is copied to the other. Contradictions are left untouched.\nDry run: read "
+                       "mirror_plan.csv and mirror_conflicts.csv before applying."),
+             settings=[("KEYWORDS", "bool", _("Keywords")),
+                       ("FIELDS", "bool", _("Text, place and GPS fields (slower)")),
+                       ("RATING_FLAG_LABEL", "bool", _("Rating, flag and colour label"))]),
         dict(file="lc_harmonize.py", title=_("Mirror, then places (one write)"), folder="one",
              summary=_("Runs the mirror, then the place fields, and writes the sidecars of all changed "
                        "photos once at the end: faster than running both separately.\nDry run: read the "

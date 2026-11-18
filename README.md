@@ -18,7 +18,7 @@ Python scripts, with a small window to launch them, to tidy up a large [LightCra
 | `lc_stacks.py` | Stacks each RAW + JPG pair, raw on top, collapsed. |
 | `lc_collapse_stacks.py` | Collapses every expanded stack. |
 | `lc_unnamed_faces.py` | Removes unnamed faces found by automatic detection. Named faces are never touched. |
-| `lc_mirror.py` | Gives a raw and its JPG the same keywords; the more precise keyword wins; contradictions are listed, not touched. |
+| `lc_mirror.py` | Gives a raw and its JPG the same keywords (the more precise wins), text, place and GPS fields, rating, flag and colour label: a value filled on one side only is copied to the other; contradictions are listed, not touched. |
 | `lc_places.py` | Fills location / city / state / country from keywords, through a table (`places_table.csv`). |
 | `lc_harmonize.py` | Mirror, then places, with a single sidecar write at the end (faster than both separately). |
 | `lc_after_import.py` | Relink, reload, unnamed faces, stacks and sidecars in one go, on one or several folders. |
