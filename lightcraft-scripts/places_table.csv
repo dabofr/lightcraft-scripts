@@ -1,0 +1,12 @@
+﻿keyword;location;city;state;country
+Places|France|Paris;Paris;Paris;Île-de-France;France
+Places|France|Paris|Montmartre;Montmartre;Paris;Île-de-France;France
+Places|France|Porquerolles;Porquerolles;Hyères;Provence-Alpes-Côte d'Azur;France
+Places|France|Normandy;Normandy;;Normandy;France
+Places|Africa|Tunisia;Tunisia;;;Tunisia
+Places|America|USA|New York;New York;New York;New York;United States
+Places|Europe|Italy|Villa Carlotta;Villa Carlotta;Tremezzina;Lombardy;Italy
+Places|Europe|Austria|Vienna;Vienna;Vienna;;Austria
+Type|Museums|Louvre;Musée du Louvre;Paris;Île-de-France;France
+Type|Museums|MET;The Metropolitan Museum of Art;New York;New York;United States
+Type|Museums|Belvedere;Belvedere;Vienna;;Austria
